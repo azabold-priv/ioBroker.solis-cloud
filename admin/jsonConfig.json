@@ -1,0 +1,21 @@
+{
+    "i18n": true,
+    "type": "panel",
+    "items": {
+        "apiKey": {
+            "type": "text",
+            "label": "apiKeyey",
+            "newLine": true
+        },
+        "apiSecret": {
+            "type": "text",
+            "label": "apiSecret",
+            "newLine": true
+        },
+		"apiUrl": {
+            "type": "text",
+            "label": "apiUrl",
+            "newLine": true
+        }
+    }
+}

@@ -1,0 +1,90 @@
+{
+    "common": {
+        "name": "solis-cloud",
+        "version": "0.0.2",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "uk": "Початкова версія",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "Solis Cloud",
+        "titleLang": {
+            "en": "Solis Cloud",
+            "de": "Solis Cloud",
+            "ru": "Солис Облако",
+            "pt": "Nuvem Solis",
+            "nl": "Solis-wolk",
+            "fr": "Nuage Solis",
+            "it": "Solis Nuvola",
+            "es": "Nube de Solís",
+            "pl": "Chmura Soli",
+            "uk": "Хмара Соліс",
+            "zh-cn": "索利斯云"
+        },
+        "desc": {
+            "en": "Get Inverter Data from Solis Cloud",
+            "de": "Holen Sie sich Wechselrichterdaten aus der Solis Cloud",
+            "ru": "Получите данные инвертора из Solis Cloud",
+            "pt": "Obtenha dados do inversor do Solis Cloud",
+            "nl": "Ontvang omvormergegevens uit Solis Cloud",
+            "fr": "Obtenez les données de l'onduleur depuis Solis Cloud",
+            "it": "Ottieni i dati dell'inverter da Solis Cloud",
+            "es": "Obtenga datos del inversor de Solis Cloud",
+            "pl": "Pobierz dane falownika z chmury Solis",
+            "uk": "Отримайте дані інвертора з Solis Cloud",
+            "zh-cn": "从 Solis Cloud 获取逆变器数据"
+        },
+        "authors": [
+            "azabold <azabold@web.de>"
+        ],
+        "keywords": [
+            "solis",
+            "inverter",
+            "cloud",
+            "monitoring"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "solis-cloud.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/azabold-priv/ioBroker.solis-cloud/main/admin/solis-cloud.png",
+        "readme": "https://github.com/azabold-priv/ioBroker.solis-cloud/blob/main/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "energy",
+        "compact": true,
+        "connectionType": "cloud",
+        "dataSource": "poll",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=3.3.22"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.1.13"
+            }
+        ]
+    },
+    "native": {
+        "apiUrl": "https://www.soliscloud.com:13333",
+        "apiSecret": "not set",
+        "apiKey": "not set"
+    },
+    "objects": [],
+    "instanceObjects": []
+}
