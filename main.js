@@ -39,7 +39,7 @@ class SolisCloud extends utils.Adapter {
 		
 		this.setState("info.connection", false, true);
 		this.isRateLimited = false;
-		this.refreshInterval = setInterval(() => this.main(), this.config.refreshInterval);
+		this.refreshInterval = setInterval(() => this.main(), this.config.refreshInterval * 60 * 1000);
 		
 		try {
 			// Liste eingetragene Stations auf
@@ -88,7 +88,7 @@ class SolisCloud extends utils.Adapter {
 
 				if (response && response.success == true) {
 					const allowedKeys = this.config.allowedKeys;
-					#const allowedKeys = ["batteryPower", "batteryPercent", "psum", "totalLoadPower", "power"];
+					//const allowedKeys = ["batteryPower", "batteryPercent", "psum", "totalLoadPower", "power"];
 					const responseData = response.data;
 
 					for (let key in responseData) {
@@ -153,11 +153,11 @@ class SolisCloud extends utils.Adapter {
 
         } catch (error) {
 			if (error.response && error.response.status === 429) {
-				this.log.warn("Rate limit reached. Retrying in 1 minutes...");
+				this.log.warn("Rate limit reached. Retrying in 5 minutes...");
 				this.isRateLimited = true;
 				setTimeout(() => {
 					this.isRateLimited = false;
-				}, 1 * 60 * 1000);  // 1 Minuten
+				}, 5 * 60 * 1000);  // 5 Minuten
 			} else {
 				// andere Fehlerarten
 				this.log.error(error.toString());

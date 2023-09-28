@@ -1,3 +1,4 @@
+
 {
   "common": {
     "name": "solis-cloud",
@@ -86,7 +87,7 @@
     "apiSecret": "not set",
     "apiKey": "not set",
     "refreshInterval": "1",
-    "allowedKeys": ""
+    "allowedKeys": "['batteryPower', 'batteryPercent', 'psum', 'totalLoadPower', 'power']"
   },
   "objects": [],
   "instanceObjects": []
