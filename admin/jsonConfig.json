@@ -12,17 +12,17 @@
             "label": "apiSecret",
             "newLine": true
         },
-	"apiUrl": {
+		"apiUrl": {
             "type": "text",
             "label": "apiUrl",
             "newLine": true
-        }
-	"refreshInterval": {
+        },
+		"refreshInterval": {
             "type": "text",
             "label": "refreshInterval",
             "newLine": true
-        }
-	"allowedKeys": {
+        },
+		"allowedKeys": {
             "type": "text",
             "label": "allowedKeys",
             "newLine": true
