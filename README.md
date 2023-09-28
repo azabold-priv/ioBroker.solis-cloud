@@ -1,113 +1,75 @@
 ![Logo](admin/solis-cloud.png)
-# ioBroker.solis-cloud
+# SolisCloud Adapter for ioBroker
 
-[![NPM version](https://img.shields.io/npm/v/iobroker.solis-cloud.svg)](https://www.npmjs.com/package/iobroker.solis-cloud)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.solis-cloud.svg)](https://www.npmjs.com/package/iobroker.solis-cloud)
-![Number of Installations](https://iobroker.live/badges/solis-cloud-installed.svg)
-![Current version in stable repository](https://iobroker.live/badges/solis-cloud-stable.svg)
+This adapter allows for seamless integration between the SolisCloud API and your ioBroker ecosystem, making data retrieval from Solis devices such as solar inverters straightforward and efficient.
 
-[![NPM](https://nodei.co/npm/iobroker.solis-cloud.png?downloads=true)](https://nodei.co/npm/iobroker.solis-cloud/)
+## Features
 
-**Tests:** ![Test and Release](https://github.com/azabold-priv/ioBroker.solis-cloud/workflows/Test%20and%20Release/badge.svg)
+- Automatic detection and creation of Solis stations within ioBroker.
+- Periodic data fetch for each station based on user-defined intervals.
+- Implemented error-handling mechanism for API rate limits with a built-in retry mechanism.
+- HMAC-SHA1 authenticated secure API calls.
 
-## solis-cloud adapter for ioBroker
+## Installation
 
-Get Inverter Data from Solis Cloud
+1. Clone this repository.
+2. Navigate to the cloned directory and run `npm install` to pull in necessary dependencies.
+3. Within ioBroker, configure the adapter's settings as per your requirements.
+4. Activate the adapter.
 
-## Developer manual
-This section is intended for the developer. It can be deleted later.
+## API Key & Secret Retrieval
 
-### DISCLAIMER
+Before accessing the SolisCloud API, an explicit request for access is mandatory:
 
-Please make sure that you consider copyrights and trademarks when you use names or logos of a company and add a disclaimer to your README.
-You can check other adapters for examples or ask in the developer community. Using a name or logo of a company without permission may cause legal problems for you.
+Apply for API key and secret:
 
-### Getting started
+1. Navigate to the [Solis Service Centre](https://solis-service.solisinverters.com/en/support/solutions/articles/44002212561-api-access-soliscloud).
+2. Choose to submit an 'API Access Request' ticket.
+3. Ensure to fill in the corresponding Solis Cloud email address within the ticket.
+4. Wait for approval.
 
-You are almost done, only a few steps left:
-1. Create a new repository on GitHub with the name `ioBroker.solis-cloud`
-1. Initialize the current folder as a new git repository:  
-    ```bash
-    git init -b main
-    git add .
-    git commit -m "Initial commit"
-    ```
-1. Link your local repository with the one on GitHub:  
-    ```bash
-    git remote add origin https://github.com/azabold-priv/ioBroker.solis-cloud
-    ```
+To get your API key and secret:
 
-1. Push all files to the GitHub repo:  
-    ```bash
-    git push origin main
-    ```
-1. Add a new secret under https://github.com/azabold-priv/ioBroker.solis-cloud/settings/secrets. It must be named `AUTO_MERGE_TOKEN` and contain a personal access token with push access to the repository, e.g. yours. You can create a new token under https://github.com/settings/tokens.
+1. Visit [SolisCloud](https://www.soliscloud.com/).
+2. Log in to your SolisCloud account.
+3. Navigate to the "User Info" section.
+4. Under the "API Access" tab, you'll find your `apiKey` and `apiSecret`.
+5. Use these credentials in the configuration settings for the ioBroker adapter.
 
-1. Head over to [main.js](main.js) and start programming!
+## Configuration
 
-### Best Practices
-We've collected some [best practices](https://github.com/ioBroker/ioBroker.repositories#development-and-coding-best-practices) regarding ioBroker development and coding in general. If you're new to ioBroker or Node.js, you should
-check them out. If you're already experienced, you should also take a look at them - you might learn something new :)
+Following your adapter installation in ioBroker, configuration is necessary. Here's a breakdown of available configurations:
 
-### Scripts in `package.json`
-Several npm scripts are predefined for your convenience. You can run them using `npm run <scriptname>`
-| Script name | Description |
-|-------------|-------------|
-| `test:js` | Executes the tests you defined in `*.test.js` files. |
-| `test:package` | Ensures your `package.json` and `io-package.json` are valid. |
-| `test:integration` | Tests the adapter startup with an actual instance of ioBroker. |
-| `test` | Performs a minimal test run on package files and your tests. |
-| `check` | Performs a type-check on your code (without compiling anything). |
-| `lint` | Runs `ESLint` to check your code for formatting errors and potential bugs. |
-| `translate` | Translates texts in your adapter to all required languages, see [`@iobroker/adapter-dev`](https://github.com/ioBroker/adapter-dev#manage-translations) for more details. |
-| `release` | Creates a new release, see [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script#usage) for more details. |
+- **apiKey**: Your designated API key for SolisCloud.
+- **apiSecret**: Your designated API secret for SolisCloud.
+- **apiUrl**: The base URL meant for SolisCloud API interactions (default: `https://api.soliscloud.com`).
+- **refreshInterval**: The interval (in minutes) dictating the frequency of data refreshes from SolisCloud.
+- **allowedKeys**: A set array of keys determining the data types to be stored in ioBroker. E.g., `["batteryPower", "batteryPercent", "psum", "totalLoadPower", "power"]`.
 
-### Writing tests
-When done right, testing code is invaluable, because it gives you the 
-confidence to change your code while knowing exactly if and when 
-something breaks. A good read on the topic of test-driven development 
-is https://hackernoon.com/introduction-to-test-driven-development-tdd-61a13bc92d92. 
-Although writing tests before the code might seem strange at first, but it has very 
-clear upsides.
+## Functionality
 
-The template provides you with basic tests for the adapter startup and package files.
-It is recommended that you add your own tests into the mix.
+Once the adapter is activated and transitions to the "ready" phase, it will:
 
-### Publishing the adapter
-Using GitHub Actions, you can enable automatic releases on npm whenever you push a new git tag that matches the form 
-`v<major>.<minor>.<patch>`. We **strongly recommend** that you do. The necessary steps are described in `.github/workflows/test-and-release.yml`.
+1. Retrieve the station list corresponding to the provided API key.
+2. For every station, it will extract the data specified in `allowedKeys`.
+3. The extracted data is then stored under the station ID within ioBroker states.
+4. Every specified `refreshInterval`, step 2 is executed.
 
-Since you installed the release script, you can create a new
-release simply by calling:
-```bash
-npm run release
-```
-Additional command line options for the release script are explained in the
-[release-script documentation](https://github.com/AlCalzone/release-script#command-line).
+A built-in mechanism ensures that if the SolisCloud API introduces rate limitations, the adapter will detect it and retry after a 5-minute interval.
 
-To get your adapter released in ioBroker, please refer to the documentation 
-of [ioBroker.repositories](https://github.com/ioBroker/ioBroker.repositories#requirements-for-adapter-to-get-added-to-the-latest-repository).
+## Dependencies
 
-### Test the adapter manually with dev-server
-Since you set up `dev-server`, you can use it to run, test and debug your adapter.
+- **@iobroker/adapter-core**: A utility set aimed at simplifying the ioBroker adapter development process.
+- **axios**: A promise-based HTTP client suitable for browser and node.js operations.
+- **crypto**: A Node.js native module catering to varied cryptographic tasks.
 
-You may start `dev-server` by calling from your dev directory:
-```bash
-dev-server watch
-```
+## Error Handling
 
-The ioBroker.admin interface will then be available at http://localhost:8082/
+The adapter comes with an inherent error-handling mechanism equipped to tackle API errors, rate limitations, and other unexpected issues. Pertinent error logs will be available within ioBroker.
 
-Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev-server#command-line) for more details.
+## API Documentation
 
-## Changelog
-<!--
-    Placeholder for the next version (at the beginning of the line):
-    ### **WORK IN PROGRESS**
--->
-
-### **WORK IN PROGRESS**
-* (azabold) initial release
+For a comprehensive understanding and deeper insights into the SolisCloud API's functionalities, the official documentation is available [here](https://oss.soliscloud.com/templet/SolisCloud%20Platform%20API%20Document%20V2.0.pdf).
 
 ## License
 MIT License
@@ -131,3 +93,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+**Note**: If the project utilizes an MIT license or any other, ensure that the actual license text is appended. Always credit the original content creator if their work is being utilized. The provided instructions should be adjusted to perfectly align with your setup's requirements.
+
+### **WORK IN PROGRESS**
+* (azabold) initial release
+
