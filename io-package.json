@@ -83,7 +83,9 @@
     "native": {
         "apiUrl": "https://www.soliscloud.com:13333",
         "apiSecret": "not set",
-        "apiKey": "not set"
+        "apiKey": "not set",
+	"refreshInterval": "1",
+	"allowedKeys": "'batteryPower', 'batteryPercent', 'psum', 'totalLoadPower', 'power'"
     },
     "objects": [],
     "instanceObjects": []

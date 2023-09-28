@@ -14,7 +14,6 @@ class SolisCloud extends utils.Adapter {
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
-		this.stationIds = [];
     }
 
     async onReady() {
@@ -22,8 +21,6 @@ class SolisCloud extends utils.Adapter {
         this.log.info("config apiKey: " + this.config.apiKey);
         this.log.info("config apiSecret: " + this.config.apiSecret);
 		this.log.info("config apiUrl: " + this.config.apiUrl);
-		this.log.info("config refreshInterval: " + this.config.refreshInterval);
-		this.log.info("config allowedKeys: " + this.config.allowedKeys);
 
 		await this.setObjectNotExistsAsync("info.connection", {
 			type: "state",
@@ -39,9 +36,20 @@ class SolisCloud extends utils.Adapter {
 		
 		this.setState("info.connection", false, true);
 		this.isRateLimited = false;
-		this.refreshInterval = setInterval(() => this.main(), this.config.refreshInterval);
+
+        this.main();
+    }
+
+    async main() {
 		
-		try {
+		if (this.isRateLimited) {
+			this.log.warn("Skipping due to rate limit. Will retry later.");
+			return;
+		}
+		this.refreshInterval = setInterval(() => this.main(), 1 * 60 * 1000); // Jede 5 Minuten
+		var stationId;
+		
+        try {
 			// Liste eingetragene Stations auf
 			var body = JSON.stringify({ pageNo: 1, pageSize: 10 });
 			var path = '/v1/api/userStationList';
@@ -51,81 +59,69 @@ class SolisCloud extends utils.Adapter {
 
 				this.log.info("Anzahl von Stations: " + numberOfRecords);  
 				
-				for (const record of response.data.page.records) {
-					const stationId = record.id;
-					this.stationIds.push(stationId);  
-					this.log.info("Station ID: " + stationId);
-
-					await this.setObjectNotExistsAsync(stationId, {
-						type: "device",
-						common: {
-							name: "stationID",
-						},
-						native: {},
-					});
-				}
+				stationId = response.data.page.records[0].id;
+				this.log.info("Station ID: " + stationId);
+				
+				await this.setObjectNotExistsAsync(stationId, {
+					type: "device",
+					common: {
+						name: "stationID",
+					},
+					native: {},
+				});
 			}
 			
 		} catch (error) {
             this.log.error(error.toString());
         }
+		
+		
+		try {
+			// Hole Daten von Station
+			body = JSON.stringify({ id: stationId});
+			path = '/v1/api/stationDetail';
+			response = await this.apiCall(path, body);
+		
+		} catch (error) {
+            this.log.error(error.toString());
+        }	
+		
+		if (response && response.success == true) {
+			// Definiere Werte die gespeichert werden
+			const allowedKeys = ["batteryPower", "batteryPercent", "psum", "totalLoadPower", "power"];
+			
+			const responseData = response.data;
 
-        this.main();
-    }
+			for (let key in responseData) {
+				if (responseData.hasOwnProperty(key)) {
+					
+					// Überprüfen, ob der Wert gespeichert werden soll
+					if (allowedKeys.includes(key)) {
+					
+						const statePath = `${stationId}.${key}`;
+						const value = responseData[key];
 
-    async main() {
-		if (this.isRateLimited) {
-			this.log.warn("Skipping due to rate limit. Will retry later.");
-			return;
-		}
+						// Stellen Sie sicher, dass der State existiert, bevor Sie ihn setzen
+						await this.setObjectNotExistsAsync(statePath, {
+							type: "state",
+							common: {
+								name: key,
+								type: typeof value,  // Der Typ wird automatisch auf Grundlage des Wertes bestimmt
+								role: "state",
+								read: true,
+								write: false,
+							},
+							native: {},
+						});
 
-		for (const stationId of this.stationIds) {  
-			try {
-				// Hole Daten von Station
-				const body = JSON.stringify({ id: stationId });
-				const path = '/v1/api/stationDetail';
-				const response = await this.apiCall(path, body);
-
-				if (response && response.success == true) {
-					const allowedKeys = this.config.allowedKeys;
-					#const allowedKeys = ["batteryPower", "batteryPercent", "psum", "totalLoadPower", "power"];
-					const responseData = response.data;
-
-					for (let key in responseData) {
-						if (responseData.hasOwnProperty(key)) {
-							// Überprüfen, ob der Wert gespeichert werden soll
-							if (allowedKeys.includes(key)) {
-								const statePath = `${stationId}.${key}`;
-								const value = responseData[key];
-
-								// Stellen Sie sicher, dass der State existiert, bevor Sie ihn setzen
-								await this.setObjectNotExistsAsync(statePath, {
-									type: "state",
-									common: {
-										name: key,
-										type: typeof value,  // Der Typ wird automatisch auf Grundlage des Wertes bestimmt
-										role: "state",
-										read: true,
-										write: false,
-									},
-									native: {},
-								});
-
-								// Setzen Sie den Wert des State
-								await this.setStateAsync(statePath, { val: value, ack: true });
-							}
-						}
+						// Setzen Sie den Wert des State
+						await this.setStateAsync(statePath, { val: value, ack: true });
 					}
 				}
-
-			} catch (error) {
-				this.log.error(error.toString());
 			}
+			this.subscribeStates("*");
 		}
-
-		this.subscribeStates("*");
-	}
-
+    }
 	
 	async apiCall (apiPath, apiBody) {
 		try {
@@ -147,19 +143,19 @@ class SolisCloud extends utils.Adapter {
                 },
             });
     
-            this.log.debug("Resonse " + apiPath + ": " + JSON.stringify(response.data));
+            this.log.info("Resonse " + apiPath + ": " + JSON.stringify(response.data));
 			this.setState("info.connection", true, true);
 			return response.data
 
         } catch (error) {
 			if (error.response && error.response.status === 429) {
-				this.log.warn("Rate limit reached. Retrying in 1 minutes...");
+				this.log.warn("Rate limit reached. Retrying in 5 minutes...");
 				this.isRateLimited = true;
 				setTimeout(() => {
 					this.isRateLimited = false;
-				}, 1 * 60 * 1000);  // 1 Minuten
+				}, 5 * 60 * 1000);  // 5 Minuten
 			} else {
-				// andere Fehlerarten
+				// Behandeln Sie andere Fehlerarten
 				this.log.error(error.toString());
 			}
 			this.setState("info.connection", false, true);
