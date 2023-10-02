@@ -1,5 +1,8 @@
 {
     "solis-cloud adapter settings": "Adaptereinstellungen für solis-cloud",
-    "option1": "Option 1",
-    "option2": "Option 2"
+    "apiKeyey": "API Key",
+    "apiSecret": "API Secret",
+    "apiUrl": "API Url",
+    "refreshInterval": "Aktualisierungsintervall in Minuten",
+    "allowedKeys": "Keys die gespeichert werden",
 }
